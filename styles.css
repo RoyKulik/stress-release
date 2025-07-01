@@ -1,0 +1,243 @@
+/* Enhanced CSS for better contrast and readability */
+
+body {
+    font-family: 'Assistant', sans-serif;
+}
+
+/* Improved card styling with better contrast */
+.card {
+    background-color: rgba(255, 255, 255, 0.95); /* More opaque white */
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.8); /* Stronger border */
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    background-color: rgba(255, 255, 255, 0.98); /* Even more opaque on hover */
+}
+
+/* Dark mode card improvements */
+.dark .card {
+    background-color: rgba(30, 41, 59, 0.95); /* More opaque dark background */
+    border: 2px solid rgba(51, 65, 85, 0.8);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .card:hover {
+    background-color: rgba(30, 41, 59, 0.98);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Enhanced text contrast */
+.card-title {
+    color: #1e293b !important; /* Very dark slate for better contrast */
+    font-weight: 700;
+}
+
+.dark .card-title {
+    color: #f8fafc !important; /* Very light text for dark mode */
+}
+
+.card-description {
+    color: #334155 !important; /* Dark gray for better readability */
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.dark .card-description {
+    color: #e2e8f0 !important; /* Light gray for dark mode */
+}
+
+.card-type {
+    color: #4338ca !important; /* Stronger indigo for better contrast */
+    font-weight: 600;
+}
+
+.dark .card-type {
+    color: #a5b4fc !important; /* Light indigo for dark mode */
+}
+
+/* Enhanced details content */
+.details-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+    padding: 0 1rem;
+    background-color: rgba(248, 250, 252, 0.9); /* Light background for details */
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.dark .details-content {
+    background-color: rgba(15, 23, 42, 0.9); /* Dark background for details */
+}
+
+.details-content.show {
+    max-height: 500px;
+    padding: 1rem;
+}
+
+.details-content h4 {
+    color: #1e293b !important; /* Strong dark text */
+    font-weight: 700;
+}
+
+.dark .details-content h4 {
+    color: #f1f5f9 !important;
+}
+
+.details-content p,
+.details-content li {
+    color: #374151 !important; /* Darker gray for better readability */
+    line-height: 1.6;
+}
+
+.dark .details-content p,
+.dark .details-content li {
+    color: #d1d5db !important;
+}
+
+/* Control buttons improvements */
+.control-btn {
+    transition: all 0.2s ease-in-out;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #374151;
+    font-weight: 600;
+    border: 1px solid rgba(209, 213, 219, 0.8);
+}
+
+.control-btn:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.control-btn.active {
+    background-color: #4338ca; /* Stronger indigo */
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(67, 56, 202, 0.5);
+    border-color: #4338ca;
+}
+
+.dark .control-btn {
+    background-color: rgba(51, 65, 85, 0.8);
+    color: #e2e8f0;
+    border-color: rgba(71, 85, 105, 0.8);
+}
+
+.dark .control-btn:hover {
+    background-color: rgba(51, 65, 85, 0.95);
+}
+
+/* Enhanced main text elements */
+.main-greeting {
+    color: #1e293b !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dark .main-greeting {
+    color: #f8fafc !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.main-description {
+    color: #475569 !important;
+    font-weight: 500;
+}
+
+.dark .main-description {
+    color: #cbd5e1 !important;
+}
+
+.time-display {
+    color: #64748b !important;
+    font-weight: 500;
+}
+
+.dark .time-display {
+    color: #94a3b8 !important;
+}
+
+/* Enhanced icons */
+.card-icon {
+    color: #4338ca !important; /* Stronger indigo */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.dark .card-icon {
+    color: #a5b4fc !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Share button improvements */
+.share-btn {
+    background-color: #4338ca;
+    color: white;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(67, 56, 202, 0.3);
+}
+
+.share-btn:hover {
+    background-color: #3730a3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(67, 56, 202, 0.4);
+}
+
+/* Toast notification improvements */
+#share-toast {
+    transition: opacity 0.3s, transform 0.3s;
+    background-color: #1f2937;
+    color: #f9fafb;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced footer */
+.footer-text {
+    color: #6b7280 !important;
+    font-weight: 500;
+}
+
+.dark .footer-text {
+    color: #9ca3af !important;
+}
+
+/* Toggle button improvements */
+.details-toggle {
+    color: #4338ca !important;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.details-toggle:hover {
+    color: #3730a3 !important;
+    text-decoration: underline;
+}
+
+.dark .details-toggle {
+    color: #a5b4fc !important;
+}
+
+.dark .details-toggle:hover {
+    color: #c7d2fe !important;
+}
+
+/* Improved background gradient contrast */
+.bg-gradient-enhanced {
+    background: linear-gradient(135deg, 
+        rgba(240, 249, 255, 0.8) 0%, 
+        rgba(224, 231, 255, 0.8) 35%, 
+        rgba(233, 213, 255, 0.8) 100%);
+}
+
+.dark .bg-gradient-enhanced {
+    background: linear-gradient(135deg, 
+        rgba(15, 23, 42, 0.95) 0%, 
+        rgba(30, 41, 59, 0.95) 35%, 
+        rgba(51, 65, 85, 0.95) 100%);
+} 
