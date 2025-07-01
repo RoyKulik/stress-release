@@ -76,8 +76,98 @@ body {
 }
 
 .details-content.show {
-    max-height: 500px;
+    max-height: 400px; /* Reduced height to ensure scrolling */
     padding: 1rem;
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Hide horizontal scrolling */
+    scroll-behavior: smooth; /* Smooth scrolling */
+    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+}
+
+/* Custom scrollbar styling for better appearance */
+.details-content.show::-webkit-scrollbar {
+    width: 8px;
+}
+
+.details-content.show::-webkit-scrollbar-track {
+    background: rgba(226, 232, 240, 0.5);
+    border-radius: 4px;
+}
+
+.details-content.show::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.6);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.details-content.show::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.8);
+}
+
+/* Dark mode scrollbar */
+.dark .details-content.show::-webkit-scrollbar-track {
+    background: rgba(51, 65, 85, 0.5);
+}
+
+.dark .details-content.show::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.6);
+}
+
+.dark .details-content.show::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.8);
+}
+
+/* Firefox scrollbar styling */
+.details-content.show {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.6) rgba(226, 232, 240, 0.5);
+}
+
+.dark .details-content.show {
+    scrollbar-color: rgba(148, 163, 184, 0.6) rgba(51, 65, 85, 0.5);
+}
+
+/* Scroll indicator - subtle fade at bottom when content overflows */
+.details-content.show {
+    position: relative;
+}
+
+.details-content.show::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(transparent, rgba(248, 250, 252, 0.9));
+    pointer-events: none;
+    border-radius: 0 0 8px 8px;
+}
+
+.dark .details-content.show::after {
+    background: linear-gradient(transparent, rgba(15, 23, 42, 0.9));
+}
+
+/* Hide the fade effect when scrolled to bottom */
+.details-content.show::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .details-content.show {
+        max-height: 300px; /* Smaller height on mobile */
+    }
+    
+    .details-content.show::-webkit-scrollbar {
+        width: 6px; /* Thinner scrollbar on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .details-content.show {
+        max-height: 250px; /* Even smaller on very small screens */
+    }
 }
 
 .details-content h4 {
