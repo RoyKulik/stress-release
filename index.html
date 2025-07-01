@@ -1,3 +1,42 @@
+<style>
+    body {
+        font-family: 'Assistant', sans-serif;
+    }
+    .card {
+        background-color: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    .control-btn {
+        transition: all 0.2s ease-in-out;
+    }
+    .control-btn.active {
+        background: linear-gradient(to right, #6366f1, #8b5cf6); /* violet/indigo */
+        color: white;
+        box-shadow: 0 4px 14px 0 rgba(107, 70, 229, 0.5);
+    }
+    .details-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+        padding: 0 1rem;
+    }
+    .details-content.show {
+        max-height: 500px;
+        padding: 1rem 1rem;
+    }
+    #share-toast {
+        transition: opacity 0.3s, transform 0.3s;
+    }
+</style>
+
+<body class="bg-gradient-to-br from-purple-50 via-indigo-100 to-sky-50 dark:from-purple-950 dark:via-indigo-900 dark:to-sky-900 text-slate-800 dark:text-slate-100">
+
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -403,3 +442,46 @@
     </script>
 </body>
 </html>
+<script>
+    function renderSuggestions(period) {
+        containerEl.innerHTML = '';
+        const currentSuggestions = treatments[period];
+
+        currentSuggestions.forEach((suggestion, index) => {
+            const card = document.createElement('div');
+            card.className = 'card rounded-xl p-6 shadow-xl hover:shadow-2xl border border-indigo-100 dark:border-indigo-700';
+            card.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="text-violet-600 dark:text-violet-300 ml-4">
+                        ${suggestion.icon}
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-violet-700 dark:text-violet-300">${suggestion.type}</p>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">${suggestion.title}</h3>
+                    </div>
+                </div>
+                <p class="text-slate-700 dark:text-slate-200 text-base leading-relaxed">${suggestion.description}</p>
+                <div class="w-full mt-4">
+                    <button class="details-toggle text-indigo-700 dark:text-indigo-300 font-semibold" data-target="details-${period}-${index}">\u05e7\u05e8\u05d0/\u05d9 \u05e2\u05d5\u05d3</button>
+                    <div id="details-${period}-${index}" class="details-content text-slate-700 dark:text-slate-300 border-t border-indigo-100 dark:border-indigo-600 mt-2">
+                        ${suggestion.details}
+                    </div>
+                </div>
+            `;
+            containerEl.appendChild(card);
+        });
+
+        // Add event listeners for "קרא/י עוד"
+        document.querySelectorAll('.details-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.dataset.target;
+                const targetContent = document.getElementById(targetId);
+                targetContent.classList.toggle('show');
+                button.textContent = targetContent.classList.contains('show') ? 'סגור' : 'קרא/י עוד';
+            });
+        });
+    }
+</script>
+
+
+
