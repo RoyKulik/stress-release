@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מדריך יומי לניהול מתחים</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Assistant', sans-serif;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .control-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .control-btn.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+        }
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            padding: 0 1rem;
+        }
+        .details-content.show {
+            max-height: 500px; /* Adjust as needed */
+            padding: 1rem 1rem;
+        }
+        #share-toast {
+            transition: opacity 0.3s, transform 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+
+    <div class="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-sky-100 via-indigo-100 to-purple-100 dark:from-sky-900 dark:via-indigo-900 dark:to-purple-900">
+        
+        <div class="text-center w-full max-w-4xl mx-auto mb-6">
+            <h1 id="time-greeting" class="text-4xl md:text-5xl font-bold text-slate-700 dark:text-slate-100 mb-2">טוען...</h1>
+            <p id="current-time" class="text-lg text-slate-500 dark:text-slate-400"></p>
+        </div>
+
+        <!-- Manual Time Controls -->
+        <div class="w-full max-w-lg mx-auto mb-8 p-2 bg-slate-200/60 dark:bg-slate-800/60 rounded-full flex items-center justify-center gap-2 flex-wrap">
+            <button id="btn-auto" class="control-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200">אוטומטי</button>
+            <button id="btn-morning" data-period="morning" class="control-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200">בוקר</button>
+            <button id="btn-afternoon" data-period="afternoon" class="control-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200">צהריים</button>
+            <button id="btn-evening" data-period="evening" class="control-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200">ערב</button>
+            <button id="btn-night" data-period="night" class="control-btn flex-1 py-2 px-4 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200">לילה</button>
+        </div>
+
+        <p class="mb-8 text-lg text-center text-slate-600 dark:text-slate-300">להלן מספר הצעות שיעזרו לך לנהל מתח ולמצוא רגיעה.</p>
+
+        <div id="suggestions-container" class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Suggestions will be injected here by JavaScript -->
+        </div>
+
+        <footer class="mt-12 text-center text-sm text-slate-500 dark:text-slate-400">
+             <button id="share-btn" class="mb-4 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-full inline-flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill ml-2" viewBox="0 0 16 16"><path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/></svg>
+                <span>שתף את האתר</span>
+            </button>
+            <p>ההצעות מבוססות על תוכנית הפעולה לניהול מתח פיזי ונפשי.</p>
+            <p>&copy; 2024 - נוצר כדי לסייע ברווחה הנפשית שלך.</p>
+        </footer>
+    </div>
+    
+    <!-- Toast Notification for Share -->
+    <div id="share-toast" class="fixed bottom-5 right-5 bg-gray-800 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-3">
+        הקישור הועתק!
+    </div>
+
+
+    <script>
+        // --- DATA: Treatments with detailed instructions ---
+        const treatments = {
+            morning: [
+                {
+                    type: "נשימה ומיינדפולנס",
+                    title: "תרגול נשימה סרעפתית",
+                    description: "התחל את היום ב-3-5 דקות של נשימות בטן עמוקות. זה מפעיל את מערכת העצבים הפאראסימפתטית ומרגיע את הגוף.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-wind" viewBox="0 0 16 16"><path d="M12.5 2A2.5 2.5 0 0 0 10 4.5a.5.5 0 0 1-1 0A3.5 3.5 0 1 1 12.5 8H.5a.5.5 0 0 1 0-1h12a2.5 2.5 0 0 0 0-5m-7 1a1 1 0 0 0-1 1 .5.5 0 0 1-1 0 2 2 0 1 1 2 2h-5a.5.5 0 0 1 0-1h5a1 1 0 0 0 0-2M0 8a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 0 8m2.5 2.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5m2 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>התמקם בנוחות:</b> שכב על הגב על משטח ישר. כופף את הברכיים והנח את כפות הרגליים שטוחות על הרצפה.</li>
+                            <li><b>הנח ידיים:</b> הנח יד אחת על החזה העליון והשנייה על הבטן, ממש מתחת לכלוב הצלעות.</li>
+                            <li><b>שאף אוויר:</b> שאף אוויר לאט דרך האף. התמקד בהרחבת הבטן כך שהיד שעליה תעלה. היד על החזה צריכה לזוז כמה שפחות.</li>
+                            <li><b>נשוף אוויר:</b> נשוף לאט דרך שפתיים מכווצות (כמו בכיבוי נר). הרגש את הבטן יורדת.</li>
+                            <li><b>חזור על הפעולה:</b> המשך כך במשך 3-5 דקות, תוך התמקדות בקצב האיטי והמרגיע של הנשימה.</li>
+                        </ol>
+                    `
+                },
+                {
+                    type: "תנועה",
+                    title: "הליכת בוקר קצרה",
+                    description: "צא להליכה של 10-15 דקות. המטרה היא תנועה עדינה, לא אימון אינטנסיבי. התמקד בתחושות הגוף ובסביבה.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person-walking" viewBox="0 0 16 16"><path d="M9.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0M6.44 3.752A.75.75 0 0 1 7 3.5h1.445c.742 0 1.34.643 1.243 1.38l-.43 3.083a1.25 1.25 0 0 1-2.486 0L6.201 4.88a.75.75 0 0 1 .239-1.128ZM5.5 10.182a.5.5 0 0 1 .447-.276l1.22-1.018.994 6.456a.75.75 0 1 1-1.48.228l-.55-3.574-1.522.924a.5.5 0 0 1-.48-.729Z"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>קבע כוונה:</b> לפני היציאה, החלט שהמטרה היא להיות נוכח, לא להגיע לשום מקום מסוים.</li>
+                            <li><b>התנתק:</b> השאר את הטלפון בכיס או בבית. נסה להימנע מהאזנה למוזיקה או פודקאסטים בפעמים הראשונות.</li>
+                            <li><b>התמקד בחושים:</b> שים לב לתחושת כפות הרגליים על המדרכה, לרוח על הפנים, לציוץ הציפורים, לצבעי השמיים.</li>
+                            <li><b>נשום:</b> נסה לסנכרן את הנשימה עם הצעדים. לדוגמה, שאיפה על פני 3 צעדים, נשיפה על פני 4 צעדים.</li>
+                        </ol>
+                    `
+                },
+                {
+                    type: "מיינדפולנס",
+                    title: "מדיטציית מיינדפולנס",
+                    description: "הקדש 5 דקות לישיבה שקטה. זה מאמן את המוח להיות פחות תגובתי למחשבות מלחיצות.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-peace" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16m-1-8.25V13.5a.5.5 0 0 0 1 0V7.75a.5.5 0 0 0-1 0m-3.32-3.32a.5.5 0 0 0-.353.147L1.475 7.425a.5.5 0 0 0 .707.707l2.854-2.853a.5.5 0 0 0-.354-.854m7.347.001a.5.5 0 0 0-.354-.854L8.525 7.425a.5.5 0 0 0 .707.707l2.854-2.853a.5.5 0 0 0-.354-.147M8 2.5a.5.5 0 0 0-.5.5V7a.5.5 0 0 0 1 0V3a.5.5 0 0 0-.5-.5"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>מצא מקום שקט:</b> שב על כיסא כשהגב ישר אך לא נוקשה, וכפות הרגליים מונחות על הרצפה.</li>
+                            <li><b>עצום עיניים בעדינות:</b> התחל עם 3 נשימות עמוקות כדי להתמקם.</li>
+                            <li><b>התמקד בנשימה:</b> הפנה את תשומת הלב לתחושה הפיזית של הנשימה - האוויר שנכנס ויוצא מהנחיריים, או עליית וירידת הבטן.</li>
+                            <li><b>הכלה של מחשבות:</b> המוח שלך ינדוד. זה טבעי. אל תכעס על עצמך. פשוט שים לב שהמחשבה עלתה, והחזר בעדינות את תשומת הלב לנשימה.</li>
+                            <li><b>סיים בעדינות:</b> לאחר 5 דקות, הרחב את המודעות חזרה לגוף כולו, ואז פקח את העיניים לאט.</li>
+                        </ol>
+                    `
+                }
+            ],
+            afternoon: [
+                {
+                    type: "נשימה ומיינדפולנס",
+                    title: "אתנחתא של 5 דקות",
+                    description: "עצור הכל ל-5 דקות. המטרה היא לשבור את מעגל המתח באמצע היום.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-pause-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M5 6.25a1.25 1.25 0 1 1 2.5 0v3.5a1.25 1.25 0 1 1-2.5 0zm3.5 0a1.25 1.25 0 1 1 2.5 0v3.5a1.25 1.25 0 1 1-2.5 0z"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>התרחק מהמשימה:</b> סובב את הכיסא מהמחשב, או קום ועמוד ליד חלון.</li>
+                            <li><b>נשימה מודעת:</b> בצע 5 נשימות סרעפתיות איטיות ועמוקות.</li>
+                            <li><b>סריקה חושית:</b> שים לב לדבר אחד שאתה שומע, דבר אחד שאתה רואה בפירוט, ותחושה אחת בגוף (למשל, כפות הרגליים על הרצפה).</li>
+                            <li><b>חזור בעדינות:</b> לאחר מספר דקות, חזור לפעילות שלך, תוך ניסיון לשמר חלק מתחושת הרוגע.</li>
+                        </ol>
+                    `
+                },
+                 {
+                    type: "תנועה",
+                    title: "מתיחות קלות",
+                    description: "קום מהכיסא ובצע כמה מתיחות עדינות לצוואר, לכתפיים ולגב. שחרור מתח פיזי משפיע לטובה על המצב הנפשי.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-universal-access" viewBox="0 0 16 16"><path d="M8 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m-2.5 2.443c.616.25 1.3.435 2.03.558L6.04 9.69a.5.5 0 1 1-.958-.293l1.325-4.332-1.038.259a.5.5 0 1 1-.233-.97L7.99 3.138a.5.5 0 0 1 .585.45l.383 4.108c.693-.131 1.344-.336 1.943-.595a.5.5 0 1 1 .536.85L10.73 9.8l1.39-1.112a.5.5 0 1 1 .638.79l-1.627 1.3a.5.5 0 0 1-.633.05l-1.42-1.065a.5.5 0 0 1-.132-.748l.53-.875c-.733.36-1.517.62-2.33.782L6.14 12.7a.5.5 0 1 1-.94-.34l1.18-3.937Z"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>מתיחת צוואר:</b> הטה בעדינות את האוזן הימנית לכיוון כתף ימין. החזק 15 שניות. חזור על הצד השני.</li>
+                            <li><b>סיבובי כתפיים:</b> הרם את הכתפיים לכיוון האוזניים, סובב אותן לאחור ולמטה. חזור 5 פעמים, ואז 5 פעמים קדימה.</li>
+                            <li><b>מתיחת חתול-פרה:</b> שב בקצה הכיסא. בשאיפה, קמר את הגב והבט למעלה. בנשיפה, עגל את הגב ומשוך את הסנטר לחזה.</li>
+                            <li><b>מתיחת גב:</b> שלב אצבעות ומתח את הידיים ישר מעל הראש. החזק 10 שניות.</li>
+                        </ol>
+                    `
+                },
+                {
+                    type: "טכניקת קרקוע",
+                    title: "תרגיל 5-4-3-2-1",
+                    description: "השתמש בחושים כדי להתחבר להווה ולהעביר את הפוקוס מהחרדה למציאות.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-signpost-split" viewBox="0 0 16 16"><path d="M7 7V1.414a1 1 0 0 1 2 0V7h5a1 1 0 0 1 .8.4l.975 1.3a.5.5 0 0 1 0 .6l-1.95 2.6a.5.5 0 0 1-.8.2H9v5.586a1 1 0 0 1-2 0V9H2a1 1 0 0 1-.8-.4L.225 7.3a.5.5 0 0 1 0-.6L1.2 5.4A1 1 0 0 1 2 5h5zm1 1H2l-.75 1L2 10h6V8zm0-1V2l.75 1L8 4v3zm1 1v2h5l.75-1L14 8h-5z"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <p class="mb-2">עצור לרגע ונשום עמוק. לאחר מכן, זהה בשקט לעצמך:</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>5 דברים שאתה יכול לראות:</b> התבונן סביבך ומצא חמישה חפצים. שים לב לצבע, למרקם, לצורה שלהם. (למשל: "אני רואה את העט הכחול שלי, את סדק בקיר, את העלה הירוק...")</li>
+                            <li><b>4 דברים שאתה יכול להרגיש:</b> הפנה את תשומת הלב לתחושות פיזיות. (למשל: "אני מרגיש את כפות הרגליים על הרצפה, את משענת הכיסא על הגב...")</li>
+                            <li><b>3 דברים שאתה יכול לשמוע:</b> הקשב לקולות סביבך. (למשל: "אני שומע את המזגן, את המכוניות בחוץ, את הנשימה שלי...")</li>
+                            <li><b>2 דברים שאתה יכול להריח:</b> נסה לזהות ריחות באוויר. (למשל: "אני מריח קפה, את הבושם שלי...")</li>
+                            <li><b>1 דבר שאתה יכול לטעום:</b> שים לב לטעם בפה. (למשל: "אני טועם משחת שיניים, או את טעם המים ששתיתי...")</li>
+                        </ul>
+                    `
+                }
+            ],
+            evening: [
+                {
+                    type: "הכנה לשינה",
+                    title: "שגרת 'הרגעות' לפני השינה",
+                    description: "הקדש 30-60 דקות לפעילות מרגיעה ללא מסכים. זה מאותת למוח שהגיע הזמן להאט.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-book" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.746c-.917-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">רעיונות לפעילויות:</h4>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><b>קריאה:</b> בחר ספר שאינו מותח או מעורר מדי.</li>
+                            <li><b>האזנה:</b> שים מוזיקה רגועה, פודקאסט מרגיע או ספר שמע.</li>
+                            <li><b>אמבטיה חמה:</b> ירידת טמפרטורת הגוף לאחר האמבטיה יכולה לסייע בהשריית שינה.</li>
+                            <li><b>מתיחות עדינות:</b> בצע תרגילי יוגה רסטורטיבית או מתיחות קלות.</li>
+                            <li><b>כתיבה:</b> כתוב ביומן על היום שהיה או הכן רשימת מטלות למחר כדי "לפרוק" את המחשבות מהראש.</li>
+                        </ul>
+                    `
+                },
+                {
+                    type: "שחרור מתח פיזי",
+                    title: "הרפיית שרירים הדרגתית (PMR)",
+                    description: "שכב בנוחות וכווץ ושחרר קבוצות שרירים שונות. זה משחרר מתח פיזי אגור ומעמיק את תחושת הרגיעה.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person-arms-up" viewBox="0 0 16 16"><path d="M8 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/><path d="M7.75 6.112a.5.5 0 0 1 .5 0l4.213 2.528a.5.5 0 0 1 0 .86l-4.213 2.528a.5.5 0 0 1-.5-.43V6.542zm1.5 2.755L12.5 7.15v2.69L9.25 8.132v.735zM4.213 8.64a.5.5 0 0 1 0-.86l4.213-2.528a.5.5 0 0 1 .5.43v6.118a.5.5 0 0 1-.5.43L4.213 9.5a.5.5 0 0 1 0-.86zM4.5 7.15L7.75 9v-1.717L4.5 5.433z"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע (גרסה מקוצרת):</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>התחל מכפות הרגליים:</b> כווץ את אצבעות הרגליים חזק למשך 5 שניות. שחרר בבת אחת והרגש את ההרפיה למשך 15 שניות.</li>
+                            <li><b>עלה במעלה הרגליים:</b> כווץ את שרירי השוקיים, ואז הירכיים, באותה שיטה.</li>
+                            <li><b>בטן וגב:</b> כווץ את שרירי הבטן, ואז קמר מעט את הגב. כווץ ושחרר כל אחד בנפרד.</li>
+                            <li><b>ידיים וכתפיים:</b> קפוץ אגרופים, ואז הרם כתפיים לאוזניים. כווץ ושחרר.</li>
+                            <li><b>פנים:</b> כווץ את כל שרירי הפנים (עצום עיניים חזק, כווץ מצח). שחרר והרגש את הרכות.</li>
+                        </ol>
+                    `
+                },
+                {
+                    type: "שחרור מחשבות",
+                    title: "כתיבת דאגות",
+                    description: "הקדש 5 דקות לכתוב כל מה שמטריד אותך. הוצאת המחשבות מהראש אל הדף יכולה להקל על הלחץ.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-journal-check" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10.854 6.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 8.793l2.646-2.647a.5.5 0 0 1 .708 0"/><path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/><path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>קח מחברת ועט:</b> שמור אותם ליד המיטה.</li>
+                            <li><b>כתוב בחופשיות:</b> אל תצנזר. כתוב כל מה שעולה לך בראש - דאגות, פחדים, רשימות מטלות.</li>
+                            <li><b>אל תקרא שוב:</b> המטרה היא לפרוק, לא לנתח. לאחר שסיימת, סגור את המחברת.</li>
+                            <li><b>סיים בנשימה:</b> קח 3 נשימות עמוקות כדי לסמן את סיום התהליך.</li>
+                        </ol>
+                    `
+                }
+            ],
+            night: [
+                {
+                    type: "התמודדות עם נדודי שינה",
+                    title: "כלל 20 הדקות",
+                    description: "אם אינך נרדם לאחר 20 דקות, קום מהמיטה. זה מונע מהמוח לקשר את המיטה עם תסכול.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.87l.73-.73q.447.447.84.92zm.965 1.27a7 7 0 0 0-.615-.999l.754-.66q.501.57.929 1.17zM11.334 8.5a4.5 4.5 0 0 1-4.5 4.5v-1a3.5 3.5 0 0 0 3.5-3.5z"/><path d="M8 3.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>הערך את הזמן:</b> אם אתה מרגיש שאתה שוכב ער זמן רב (בערך 20-30 דקות), אל תישאר במיטה.</li>
+                            <li><b>קום ועבור לחדר אחר:</b> שמור על תאורה עמומה.</li>
+                            <li><b>עשה משהו מרגיע:</b> קרא ספר משעמם, האזן למוזיקה שקטה, או בצע תרגילי נשימה. הימנע ממסכים.</li>
+                            <li><b>חזור למיטה רק כשתרגיש עייף:</b> המטרה היא לחזק את הקשר בין המיטה לשינה, לא לערות.</li>
+                        </ol>
+                    `
+                },
+                {
+                    type: "מדיטציה",
+                    title: "סריקת גוף",
+                    description: "שכב במיטה והפנה את תשומת הלב לכל חלק בגוף, מכפות הרגליים ועד הראש. זה מרגיע את הגוף ומכין אותו לשינה.",
+                    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person-check" viewBox="0 0 16 16"><path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m1.679-4.493-1.335 2.226a.75.75 0 0 1-1.174.144l-.774-.773a.5.5 0 0 1 .708-.708l.547.548 1.17-1.951a.5.5 0 1 1 .858.514M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/><path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1z"/></svg>`,
+                    details: `
+                        <h4 class="font-bold mb-2">איך לבצע:</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><b>שכב בנוחות:</b> עצום עיניים ונשום מספר נשימות עמוקות.</li>
+                            <li><b>התחל מכפות הרגליים:</b> הפנה את כל תשומת הלב לתחושות בכפות הרגליים. שים לב לחום, קור, לחץ או כל תחושה אחרת.</li>
+                            <li><b>עלה במעלה הגוף:</b> העבר לאט את תשומת הלב לשוקיים, לברכיים, לירכיים, וכן הלאה, דרך הבטן, החזה, הידיים, הכתפיים, הצוואר והפנים.</li>
+                            <li><b>התבונן ללא שיפוט:</b> אם אתה מרגיש כאב או מתח, פשוט שים לב אליו. אין צורך לשנות אותו. המטרה היא מודעות.</li>
+                        </ol>
+                    `
+                }
+            ]
+        };
+
+        // --- CORE LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const greetingEl = document.getElementById('time-greeting');
+            const timeEl = document.getElementById('current-time');
+            const containerEl = document.getElementById('suggestions-container');
+            const controlButtons = document.querySelectorAll('.control-btn');
+            const autoBtn = document.getElementById('btn-auto');
+            const shareBtn = document.getElementById('share-btn');
+            const shareToast = document.getElementById('share-toast');
+
+            let timerInterval;
+
+            function updateTimeAndSuggestions(manualPeriod = null) {
+                if (timerInterval) clearInterval(timerInterval);
+
+                let periodOfDay;
+                let greeting;
+                let timeString;
+
+                if (manualPeriod) {
+                    periodOfDay = manualPeriod;
+                    const periodNames = { morning: 'בוקר', afternoon: 'צהריים', evening: 'ערב', night: 'לילה' };
+                    greeting = `הצעות ל${periodNames[manualPeriod]}`;
+                    timeString = 'מצב ידני';
+                } else {
+                    const now = new Date();
+                    const hour = now.getHours();
+                    
+                    if (hour >= 5 && hour < 12) { periodOfDay = 'morning'; greeting = 'בוקר טוב'; } 
+                    else if (hour >= 12 && hour < 18) { periodOfDay = 'afternoon'; greeting = 'צהריים טובים'; } 
+                    else if (hour >= 18 && hour < 22) { periodOfDay = 'evening'; greeting = 'ערב טוב'; } 
+                    else { periodOfDay = 'night'; greeting = 'לילה טוב'; }
+                    
+                    timeString = `השעה כעת ${now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}`;
+                    timerInterval = setInterval(() => updateTimeAndSuggestions(), 60000);
+                }
+
+                greetingEl.textContent = greeting;
+                timeEl.textContent = timeString;
+
+                controlButtons.forEach(btn => {
+                    btn.classList.toggle('active', (manualPeriod && btn.dataset.period === manualPeriod) || (!manualPeriod && btn.id === 'btn-auto'));
+                });
+
+                renderSuggestions(periodOfDay);
+            }
+
+            function renderSuggestions(period) {
+                containerEl.innerHTML = '';
+                const currentSuggestions = treatments[period];
+
+                currentSuggestions.forEach((suggestion, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card rounded-xl p-6 shadow-lg';
+                    card.innerHTML = `
+                        <div class="flex items-center mb-3">
+                            <div class="text-indigo-500 dark:text-indigo-400 ml-4">
+                                ${suggestion.icon}
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">${suggestion.type}</p>
+                                <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">${suggestion.title}</h3>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-300 text-base leading-relaxed">${suggestion.description}</p>
+                        <div class="w-full mt-4">
+                            <button class="details-toggle text-indigo-600 dark:text-indigo-400 font-semibold" data-target="details-${period}-${index}">קרא/י עוד</button>
+                            <div id="details-${period}-${index}" class="details-content text-slate-600 dark:text-slate-300 border-t border-slate-200 dark:border-slate-700 mt-2">
+                                ${suggestion.details}
+                            </div>
+                        </div>
+                    `;
+                    containerEl.appendChild(card);
+                });
+
+                // Add event listeners for the new "Read More" buttons
+                document.querySelectorAll('.details-toggle').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const targetId = button.dataset.target;
+                        const targetContent = document.getElementById(targetId);
+                        targetContent.classList.toggle('show');
+                        button.textContent = targetContent.classList.contains('show') ? 'סגור' : 'קרא/י עוד';
+                    });
+                });
+            }
+
+            // --- Event Listeners ---
+            controlButtons.forEach(btn => {
+                if (btn.id !== 'btn-auto') {
+                    btn.addEventListener('click', () => updateTimeAndSuggestions(btn.dataset.period));
+                }
+            });
+
+            autoBtn.addEventListener('click', () => updateTimeAndSuggestions());
+
+            shareBtn.addEventListener('click', async () => {
+                const shareData = {
+                    title: 'מדריך יומי לניהול מתחים',
+                    text: 'מצאתי אתר שעוזר לנהל מתחים עם הצעות מותאמות לשעה ביום. אולי זה יעזור גם לך.',
+                    url: window.location.href
+                };
+                try {
+                    // Use Web Share API if available
+                    if (navigator.share) {
+                        await navigator.share(shareData);
+                    } else {
+                        throw new Error('Web Share API not supported');
+                    }
+                } catch (err) {
+                    // Fallback to copy to clipboard
+                    const dummy = document.createElement('textarea');
+                    document.body.appendChild(dummy);
+                    dummy.value = window.location.href;
+                    dummy.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(dummy);
+                    showToast('הקישור הועתק!');
+                }
+            });
+            
+            function showToast(message) {
+                shareToast.textContent = message;
+                shareToast.classList.remove('opacity-0', 'translate-y-3');
+                setTimeout(() => {
+                    shareToast.classList.add('opacity-0', 'translate-y-3');
+                }, 2000);
+            }
+
+            // Initial call in automatic mode
+            updateTimeAndSuggestions();
+        });
+    </script>
+</body>
+</html>
